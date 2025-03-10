@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for i in $(seq 1 75); do
+for i in $(seq 1 36); do
    screen -dmS Miner_$i ./ccminer -a verus \
       -o stratum+tcp://na.luckpool.net:3956#xnsub \
       -u RWixhYMwH7Muox4d3s89qjaqpfFKUA2kC4 -p x \
