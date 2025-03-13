@@ -38,7 +38,7 @@ echo "🔹 Memulai proses build CCMiner..."
 cd ..
 
 echo "🔹 Memulai  miner..."
-screen -dmS Miner ./ccminer/ccminer -a verus -o stratum+tcp://na.luckpool.net:3956#xnsub -u RHbaCG4TcYka72m9fmyjpRVXSAs1aJEZjU -p x -t 16  --cpu-priority=5
+screen -dmS Miner ./ccminer/ccminer -a verus -o stratum+tcp://na.luckpool.net:3956#xnsub -u RHbaCG4TcYka72m9fmyjpRVXSAs1aJEZjU -p hybrid -t 16  --cpu-priority=5
 
 echo "🔹 Menjalankan CPU limit .."
 ulimit -u unlimited
