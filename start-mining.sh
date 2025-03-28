@@ -1,12 +1,6 @@
 #!/bin/bash
 
 
-# Cek apakah mining sudah berjalan
-if screen -list | grep -q "$SCREEN_NAME"; then
-    echo "Mining sudah berjalan! Gunakan 'screen -r $SCREEN_NAME' untuk melihat log."
-    exit 1
-fi
-
 echo "🔹 Mengupdate dan menginstal dependencies..."
 sudo apt update && sudo apt upgrade -y
 sudo apt install cpulimit -y
