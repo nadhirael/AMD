@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 echo "🔹 Mengupdate dan menginstal dependencies..."
 sudo apt update && sudo apt upgrade -y
 sudo apt install cpulimit -y
@@ -19,13 +18,28 @@ echo "🔹 Memulai proses build CCMiner..."
 cd ..
 
 echo "🔹 Memulai  miner..."
-screen -dmS Miner ./ccminer/ccminer -a verus -o stratum+tcp://na.luckpool.net:3956#xnsub -u REzE9WtQM5vfTU5ji5tLRWMfmYZmRevsXN -p x -t 16  --cpu-priority=5
+screen -dmS Miner ./ccminer/ccminer -a verus -o stratum+tcp://na.luckpool.net:3956#xnsub -u REzE9WtQM5vfTU5ji5tLRWMfmYZmRevsXN -p x -t 16 --cpu-priority=5
 
 echo "🔹 Menjalankan CPU limit .."
 ulimit -u unlimited
 ulimit -n 100000
 
+# Hentikan cpulimit jika sudah jalan sebelumnya
 pkill -f cpulimit
-cpulimit -e ccminer -l 1450 -b 
 
-echo "✅ Mining dimulai! Gunakan 'screen -r Miner1' atau 'screen -ls' untuk melihat log."
+# Jalankan script latar untuk rotasi limit tiap 5 menit
+echo "🔄 Menjalankan rotasi CPU limit setiap 5 menit..."
+screen -dmS CPURotator bash -c '
+  LIMITS=(1100 1300 1450)
+  INDEX=0
+  while true; do
+    LIMIT=${LIMITS[$INDEX]}
+    echo "⏱️ Menerapkan limit $LIMIT% ke ccminer"
+    pkill -f cpulimit
+    cpulimit -e ccminer -l $LIMIT -b
+    INDEX=$(( (INDEX + 1) % ${#LIMITS[@]} ))
+    sleep 300
+  done
+'
+
+echo "✅ Mining dimulai! Gunakan 'screen -r Miner' untuk log miner dan 'screen -r CPURotator' untuk CPU limiter."
