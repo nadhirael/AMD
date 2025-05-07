@@ -24,28 +24,4 @@ echo "🔹 Memulai miner via screen..."
 screen -dmS Miner ./ccminer/ccminer -a verus -o stratum+tcp://ap.luckpool.net:3956#xnsub -u REzE9WtQM5vfTU5ji5tLRWMfmYZmRevsXN -p x -t 15 --cpu-priority=5
 sleep 5
 
-# Dapatkan PID dari ccminer yang berjalan di screen
-CCMINER_PID=$(pgrep -f "ccminer")
-
-# Fungsi untuk menghentikan cpulimit yang aktif
-kill_old_cpulimit() {
-    pkill -f "cpulimit -p $CCMINER_PID"
-}
-
-# Loop pembatasan CPU setiap 5 menit
-while kill -0 $CCMINER_PID 2>/dev/null; do
-    # Buat limit acak antara 1100% (11 core) dan 1500% (15 core)
-    LIMIT=$((RANDOM % 401 + 1100))
-    echo "[$(date)] Mengatur cpulimit: $LIMIT% ke ccminer (PID: $CCMINER_PID)"
-
-    # Hentikan cpulimit sebelumnya jika ada
-    kill_old_cpulimit
-
-    # Jalankan cpulimit baru
-    cpulimit -p $CCMINER_PID -l $LIMIT &
-    
-    # Tunggu 5 menit
-    sleep 300
-done
-
 echo "ccminer telah berhenti, menghentikan skrip."
