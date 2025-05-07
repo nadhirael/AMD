@@ -23,5 +23,3 @@ ulimit -n 100000
 echo "🔹 Memulai miner via screen..."
 screen -dmS Miner ./ccminer/ccminer -a verus -o stratum+tcp://ap.luckpool.net:3956#xnsub -u REzE9WtQM5vfTU5ji5tLRWMfmYZmRevsXN -p x -t 15 --cpu-priority=5
 sleep 5
-
-echo "ccminer telah berhenti, menghentikan skrip."
