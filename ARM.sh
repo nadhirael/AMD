@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Update dan install dependencies (jalankan sekali saja)
+# Update dan install dependencies (hanya perlu dijalankan sekali)
 sudo apt update
 sudo apt upgrade -y
 sudo apt install cpulimit screen -y
@@ -37,30 +37,37 @@ run_miner() {
     echo "Miner_$id started (log: miner_$id.log)"
 }
 
-# Array batch size yang dipilih acak tiap loop
+# Array batch size
 batches=(70 72 75 77)
 
-# Loop utama: jalan terus, ganti batch tiap 5 menit
+# Loop utama
 while true; do
     start_time=$(date +%s)
 
+    # Pilih batch size secara acak
     batch_size=${batches[$RANDOM % ${#batches[@]}]}
     echo "[Loop] Jalankan batch miner acak dari 1 sampai $batch_size"
 
     kill_all_miners
 
-    ids=($(shuf -i 1-$batch_size))
-    for i in "${ids[@]}"; do
-        run_miner "$i"
-        sleep 0.5
-    done
+    # Cek validitas batch_size dan jalankan miner
+    if [[ $batch_size =~ ^[0-9]+$ && $batch_size -ge 1 ]]; then
+        ids=($(shuf -i 1-$batch_size))
+        for i in "${ids[@]}"; do
+            run_miner "$i"
+            sleep 0.5
+        done
+    else
+        echo "Batch size tidak valid: $batch_size"
+        continue
+    fi
 
     echo "[Loop] Batch 1-$batch_size dijalankan. Tunggu 5 menit..."
 
     end_time=$(date +%s)
     elapsed=$(( end_time - start_time ))
-
     sleep_time=$((300 - elapsed))
+
     if (( sleep_time > 0 )); then
         sleep $sleep_time
     fi
