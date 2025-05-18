@@ -1,65 +1,66 @@
 #!/usr/bin/env bash
+
+# Update dan install dependencies (jalankan sekali saja, bisa dipisah)
 sudo apt update
 sudo apt upgrade -y
-sudo apt install cpulimit -y
+sudo apt install cpulimit screen -y
 sudo apt-get install libcurl4-openssl-dev libssl-dev libjansson-dev automake autotools-dev build-essential -y
 
- git clone --single-branch -b ARM https://github.com/monkins1010/ccminer.git
-
-cd ccminer
-
- chmod +x build.sh
-
- chmod +x configure.sh
-
- chmod +x autogen.sh
-
- ./build.sh
- 
+# Clone dan build ccminer jika belum ada
+if [ ! -d "ccminer" ]; then
+    git clone --single-branch -b ARM https://github.com/monkins1010/ccminer.git
+    cd ccminer || exit
+    chmod +x build.sh configure.sh autogen.sh
+    ./build.sh
+    cd ..
+fi
 
 # Fungsi kill semua miner screen
 kill_all_miners() {
     echo "Killing all Miner screens..."
-    # List semua screen yang namanya Miner_XX, lalu quit
-    screen -ls | grep Miner_ | awk '{print $1}' | while read session; do
+    screen -ls | grep Miner_ | awk '{print $1}' | while read -r session; do
         screen -S "$session" -X quit
         echo "Killed screen session: $session"
     done
+    sleep 3  # Delay 3 detik untuk memastikan semua screen tertutup
 }
 
-# Fungsi menjalankan miner
+# Fungsi menjalankan miner dengan logging
 run_miner() {
     local id=$1
-    screen -dmS Miner_$id ./ccminer -a verus \
+    screen -dmS Miner_$id bash -c "./ccminer -a verus \
         -o stratum+tcp://eu.luckpool.net:3957#xnsub \
         -u REzE9WtQM5vfTU5ji5tLRWMfmYZmRevsXN \
         -p x \
         -t 1 \
-        --cpu-priority=5
-    echo "Miner_$id started"
+        --cpu-priority=5 > miner_$id.log 2>&1"
+    echo "Miner_$id started (log: miner_$id.log)"
 }
 
 # Array pilihan batch miner
 batches=(70 72 75 77)
 
 while true; do
-    # Pilih batch secara random dari array batches
-    batch_size=${batches[$RANDOM % ${#batches[@]}]}
-    echo "[Loop] Pilih batch miner 1 sampai $batch_size secara acak"
+    start_time=$(date +%s)
 
-    # Kill semua miner dulu supaya bersih
+    batch_size=${batches[$RANDOM % ${#batches[@]}]}
+    echo "[Loop] Restart batch miner 1 sampai $batch_size secara acak"
+
     kill_all_miners
 
-    # Acak urutan miner
     ids=($(shuf -i 1-$batch_size))
     for i in "${ids[@]}"; do
-        run_miner $i
-        sleep 0.1
+        run_miner "$i"
+        sleep 0.5
     done
 
-    echo "[Loop] Selesai jalankan batch 1-$batch_size. Tunggu 5 menit..."
-    sleep 300
+    echo "[Loop] Batch 1-$batch_size dijalankan, tunggu sampai 5 menit sebelum batch berikutnya..."
+
+    end_time=$(date +%s)
+    elapsed=$(( end_time - start_time ))
+
+    sleep_time=$((300 - elapsed))
+    if (( sleep_time > 0 )); then
+        sleep $sleep_time
+    fi
 done
-
-
-echo "74 Mlaku."
