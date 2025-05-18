@@ -1,30 +1,32 @@
 #!/bin/bash
 
 # Nama proses ccminer
-TARGET_NAME="ccminer"
+TARGET="ccminer"
 
+# Array limit CPU yang ingin digunakan secara bergantian (dalam %)
+LIMITS=(1450 1300 1250 1150 800)
+
+# Fungsi untuk menghentikan cpulimit yang aktif
+kill_old_cpulimit() {
+    pkill -f "cpulimit -e $TARGET"
+}
+
+# Loop tanpa henti
 while true; do
-    # Ambil PID dari ccminer (gunakan yang pertama jika ada banyak)
-    PID=$(pgrep -f "$TARGET_NAME" | head -n 1)
+    # Acak urutan LIMITS
+    SHUFFLED_LIMITS=($(shuf -e "${LIMITS[@]}"))
 
-    # Cek apakah proses ccminer ditemukan
-    if [[ -z "$PID" ]]; then
-        echo "Proses $TARGET_NAME tidak ditemukan. Cek kembali..."
-        sleep 60
-        continue
-    fi
+    # Iterasi limit yang sudah diacak
+    for LIMIT in "${SHUFFLED_LIMITS[@]}"; do
+        echo "[$(date)] Mengatur cpulimit: $LIMIT% untuk $TARGET"
 
-    # Random CPU limit: 800 - 1400 (karena kamu punya 16 core = 1600%)
-    LIMIT=$((RANDOM % 601 + 800))  # 800 sampai 1400
+        # Hentikan cpulimit yang sudah berjalan (jika ada)
+        kill_old_cpulimit
 
-    echo "$(date): Membatasi $TARGET_NAME (PID: $PID) ke ${LIMIT}% CPU..."
+        # Jalankan cpulimit dengan limit baru, di background (&)
+        cpulimit -e "$TARGET" -l "$LIMIT" &
 
-    # Hentikan proses cpulimit sebelumnya untuk PID ini
-    pkill -f "cpulimit -p $PID"
-
-    # Jalankan cpulimit untuk PID ini
-    cpulimit -p "$PID" -l "$LIMIT" -b
-
-    # Tunggu 5 menit
-    sleep 300
+        # Tunggu 5 menit (300 detik)
+        sleep 300
+    done
 done
