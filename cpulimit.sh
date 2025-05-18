@@ -4,7 +4,7 @@
 TARGET="ccminer"
 
 # Array limit CPU yang ingin digunakan secara bergantian (dalam %)
-LIMITS=(1450 1300 1250 1150 800)
+LIMITS=(1450 1350 1250 1150 900)
 
 # Fungsi untuk menghentikan cpulimit yang aktif
 kill_old_cpulimit() {
