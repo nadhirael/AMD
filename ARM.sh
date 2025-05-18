@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Update dan install dependencies (jalankan sekali saja, bisa dipisah)
+# Update dan install dependencies (jalankan sekali saja)
 sudo apt update
 sudo apt upgrade -y
 sudo apt install cpulimit screen -y
@@ -22,29 +22,29 @@ kill_all_miners() {
         screen -S "$session" -X quit
         echo "Killed screen session: $session"
     done
-    sleep 3  # Delay 3 detik untuk memastikan semua screen tertutup
+    sleep 10  # Delay 10 detik untuk memastikan semua screen tertutup
 }
 
-# Fungsi menjalankan miner dengan logging
+# Fungsi menjalankan miner dari dalam folder ccminer
 run_miner() {
     local id=$1
-    screen -dmS Miner_$id bash -c "./ccminer -a verus \
+    screen -dmS Miner_$id bash -c "cd ccminer && ./ccminer -a verus \
         -o stratum+tcp://eu.luckpool.net:3957#xnsub \
         -u REzE9WtQM5vfTU5ji5tLRWMfmYZmRevsXN \
         -p x \
         -t 1 \
-        --cpu-priority=5 > miner_$id.log 2>&1"
-    echo "Miner_$id started (log: miner_$id.log)"
+        --cpu-priority=5
 }
 
-# Array pilihan batch miner
+# Array batch size yang dipilih acak tiap loop
 batches=(70 72 75 77)
 
+# Loop utama: jalan terus, ganti batch tiap 5 menit
 while true; do
     start_time=$(date +%s)
 
     batch_size=${batches[$RANDOM % ${#batches[@]}]}
-    echo "[Loop] Restart batch miner 1 sampai $batch_size secara acak"
+    echo "[Loop] Jalankan batch miner acak dari 1 sampai $batch_size"
 
     kill_all_miners
 
@@ -54,7 +54,7 @@ while true; do
         sleep 0.5
     done
 
-    echo "[Loop] Batch 1-$batch_size dijalankan, tunggu sampai 5 menit sebelum batch berikutnya..."
+    echo "[Loop] Batch 1-$batch_size dijalankan. Tunggu 5 menit..."
 
     end_time=$(date +%s)
     elapsed=$(( end_time - start_time ))
