@@ -17,11 +17,14 @@ cd ccminer
  ./build.sh
  
 
-# Fungsi kill session screen Miner_$id kalau ada
-stop_miner() {
-    local id=$1
-    screen -S Miner_$id -X quit 2>/dev/null
-    echo "Miner_$id stopped (if existed)"
+# Fungsi kill semua miner screen
+kill_all_miners() {
+    echo "Killing all Miner screens..."
+    # List semua screen yang namanya Miner_XX, lalu quit
+    screen -ls | grep Miner_ | awk '{print $1}' | while read session; do
+        screen -S "$session" -X quit
+        echo "Killed screen session: $session"
+    done
 }
 
 # Fungsi menjalankan miner
@@ -36,24 +39,27 @@ run_miner() {
     echo "Miner_$id started"
 }
 
+# Array pilihan batch miner
+batches=(70 72 75 77)
+
 while true; do
-    # Random jumlah miner antara 70 sampai 77
-    max_id=$((70 + RANDOM % 8))
-    echo "[Loop] Restarting Miner_1 sampai Miner_$max_id secara acak..."
+    # Pilih batch secara random dari array batches
+    batch_size=${batches[$RANDOM % ${#batches[@]}]}
+    echo "[Loop] Pilih batch miner 1 sampai $batch_size secara acak"
+
+    # Kill semua miner dulu supaya bersih
+    kill_all_miners
 
     # Acak urutan miner
-    ids=($(shuf -i 1-$max_id))
-
+    ids=($(shuf -i 1-$batch_size))
     for i in "${ids[@]}"; do
-        stop_miner $i     # Stop miner dulu supaya gak numpuk
-        run_miner $i      # Start ulang miner
+        run_miner $i
         sleep 0.1
     done
 
-    echo "[Loop] Semua miner di batch ini sudah di-restart. Tunggu 5 menit..."
+    echo "[Loop] Selesai jalankan batch 1-$batch_size. Tunggu 5 menit..."
     sleep 300
 done
-
 
 
 echo "74 Mlaku."
