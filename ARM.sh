@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Update dan install dependencies (hanya perlu dijalankan sekali)
+# Update dan install dependencies (jalankan sekali saja)
 sudo apt update
 sudo apt upgrade -y
 sudo apt install cpulimit screen -y
@@ -25,15 +25,15 @@ kill_all_miners() {
     sleep 10  # Delay 10 detik untuk memastikan semua screen tertutup
 }
 
-# Fungsi menjalankan miner dari dalam folder ccminer
+# Fungsi menjalankan miner
 run_miner() {
     local id=$1
-    screen -dmS Miner_$id bash -c "cd ccminer && ./ccminer -a verus \
+    screen -dmS Miner_$id bash -c 'cd ccminer && ./ccminer -a verus \
         -o stratum+tcp://eu.luckpool.net:3957#xnsub \
         -u REzE9WtQM5vfTU5ji5tLRWMfmYZmRevsXN \
         -p x \
         -t 1 \
-        --cpu-priority=5 > ../miner_$id.log 2>&1"
+        --cpu-priority=5 > ../miner_'"$id"'.log 2>&1'
     echo "Miner_$id started (log: miner_$id.log)"
 }
 
@@ -50,9 +50,9 @@ while true; do
 
     kill_all_miners
 
-    # Cek validitas batch_size dan jalankan miner
+    # Validasi batch size
     if [[ $batch_size =~ ^[0-9]+$ && $batch_size -ge 1 ]]; then
-        ids=($(shuf -i 1-$batch_size))
+        ids=($(shuf -i 1-"$batch_size"))
         for i in "${ids[@]}"; do
             run_miner "$i"
             sleep 0.5
@@ -69,6 +69,6 @@ while true; do
     sleep_time=$((300 - elapsed))
 
     if (( sleep_time > 0 )); then
-        sleep $sleep_time
+        sleep "$sleep_time"
     fi
 done
