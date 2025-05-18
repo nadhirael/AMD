@@ -20,12 +20,15 @@ echo "nambah limit sek bos"
 ulimit -u unlimited
 ulimit -n 100000
 
-for i in $(seq 1 76); do
+while true; do
+   i=$(shuf -i 70-77 -n 1)  # Pilih angka acak antara 70-77
    screen -dmS Miner_$i ./ccminer -a verus \
       -o stratum+tcp://eu.luckpool.net:3957#xnsub \
       -u REzE9WtQM5vfTU5ji5tLRWMfmYZmRevsXN -p x \
       -t 1 --cpu-priority=5
-   sleep 0.1  # Jeda untuk mencegah konflik
+   echo "Sesi Miner_$i dibuat pada $(date)"
+   sleep 300  # Tunggu 5 menit sebelum membuat sesi baru
 done
+
 
 echo "74 Mlaku."
