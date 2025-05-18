@@ -33,7 +33,8 @@ run_miner() {
         -u REzE9WtQM5vfTU5ji5tLRWMfmYZmRevsXN \
         -p x \
         -t 1 \
-        --cpu-priority=5
+        --cpu-priority=5 > ../miner_$id.log 2>&1"
+    echo "Miner_$id started (log: miner_$id.log)"
 }
 
 # Array batch size yang dipilih acak tiap loop
