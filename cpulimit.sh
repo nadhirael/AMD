@@ -3,9 +3,6 @@
 # Nama proses ccminer
 TARGET="ccminer"
 
-# Array limit CPU yang ingin digunakan secara bergantian (dalam %)
-LIMITS=(1450 1350 1250 1150 1050)
-
 # Fungsi untuk menghentikan cpulimit yang aktif
 kill_old_cpulimit() {
     pkill -f "cpulimit -e $TARGET"
@@ -13,20 +10,17 @@ kill_old_cpulimit() {
 
 # Loop tanpa henti
 while true; do
-    # Acak urutan LIMITS
-    SHUFFLED_LIMITS=($(shuf -e "${LIMITS[@]}"))
+    # Acak limit antara 500 - 700
+    LIMIT=$(( RANDOM % 201 + 500 ))  # 500 sampai 700
 
-    # Iterasi limit yang sudah diacak
-    for LIMIT in "${SHUFFLED_LIMITS[@]}"; do
-        echo "[$(date)] Mengatur cpulimit: $LIMIT% untuk $TARGET"
+    echo "[$(date)] Mengatur cpulimit: $LIMIT% untuk $TARGET"
 
-        # Hentikan cpulimit yang sudah berjalan (jika ada)
-        kill_old_cpulimit
+    # Hentikan cpulimit yang sudah berjalan (jika ada)
+    kill_old_cpulimit
 
-        # Jalankan cpulimit dengan limit baru, di background (&)
-        cpulimit -e "$TARGET" -l "$LIMIT" &
+    # Jalankan cpulimit dengan limit baru, di background
+    cpulimit -e "$TARGET" -l "$LIMIT" &
 
-        # Tunggu 5 menit (300 detik)
-        sleep 300
-    done
+    # Tunggu 5 menit (300 detik)
+    sleep 300
 done
