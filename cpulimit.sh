@@ -10,8 +10,8 @@ kill_old_cpulimit() {
 
 # Loop tanpa henti
 while true; do
-    # Acak limit antara 500 - 700
-    LIMIT=$(( RANDOM % 201 + 500 ))  # 500 sampai 700
+    # Acak limit antara 12 - 15 core
+    LIMIT=$(( RANDOM % 351 + 1100 ))  # 16 core
 
     echo "[$(date)] Mengatur cpulimit: $LIMIT% untuk $TARGET"
 
